@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="horizontal_sep_symbol">│</string>
+    <string name="app_name">Thời tiết</string>
+    <string name="mostly_cloudy">Nhiều mây</string>
+    <string name="image_desc">Hình ảnh mô tả</string>
+    <string name="wind_speed">Tốc độ gió</string>
+    <string name="humidity">Độ ẩm</string>
+    <string name="visibility">Tầm nhìn</string>
+    <string name="today">Hôm nay</string>
+    <string name="next_7_days">7 ngày sau</string>
+</resources>

@@ -1,0 +1,11 @@
+<resources>
+    <string name="horizontal_sep_symbol">│</string>
+    <string name="app_name">Weather</string>
+    <string name="mostly_cloudy">Mostly Cloudy</string>
+    <string name="image_desc">image description</string>
+    <string name="wind_speed">Wind Speed</string>
+    <string name="humidity">Humidity</string>
+    <string name="visibility">Visibility</string>
+    <string name="today">Today</string>
+    <string name="next_7_days">Next 7 days</string>
+</resources>
