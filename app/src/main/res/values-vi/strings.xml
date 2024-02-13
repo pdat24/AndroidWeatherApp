@@ -8,5 +8,7 @@
     <string name="humidity">Độ ẩm</string>
     <string name="visibility">Tầm nhìn</string>
     <string name="today">Hôm nay</string>
-    <string name="next_7_days">7 ngày sau</string>
+    <string name="next_7_days">7 ngày tới</string>
+    <string name="location_perm_req_rationale">Ứng dụng cần quyền này để hoạt động!</string>
+    <string name="can_not_get_location">Cập nhật vị trí thất bại</string>
 </resources>

@@ -6,4 +6,5 @@
     <color name="light_grey">#BDBABA</color>
     <color name="grey">#7E7A7A</color>
     <color name="yellow">#FFC107</color>
+    <color name="status_bar">#594690</color>
 </resources>
