@@ -2,12 +2,16 @@ package com.firstapp.weatherapp.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.MutableLiveData
@@ -25,6 +29,8 @@ import com.firstapp.weatherapp.utils.Functions
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vmadalin.easypermissions.EasyPermissions
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -88,6 +94,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private val viewNoData: View by lazy {
         findViewById(R.id.viewNoData)
     }
+    private lateinit var dialog: AlertDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,18 +121,14 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     @SuppressLint("MissingPermission")
     private fun updateLocation() {
-        fusedLocationClient
-            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-            .addOnSuccessListener {
-                MainApp.location.postValue(it)
-            }
-            .addOnFailureListener {
-                Toast.makeText(
-                    this,
-                    getString(R.string.can_not_get_location),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+        if (isInternetConnected()) {
+            fusedLocationClient
+                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener {
+                    MainApp.location.postValue(it)
+                }
+        } else
+            showNoInternetConnectionPrompt()
     }
 
     private fun requestLocationPermissionIfNeeded() {
@@ -219,6 +222,31 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         startActivity(
             Intent(this, WeatherDailyActivity::class.java)
         )
+
+    private fun showNoInternetConnectionPrompt() {
+        val view = LayoutInflater.from(this).inflate(
+            R.layout.dialog_no_internet_connection,
+            LinearLayout(this),
+            false
+        )
+        dialog = MaterialAlertDialogBuilder(this)
+            .setView(view)
+            .setCancelable(false)
+            .create()
+        view.findViewById<MaterialButton>(R.id.btnRetry).setOnClickListener {
+            if (isInternetConnected()) {
+                dialog.dismiss()
+                updateLocation()
+            }
+        }
+        dialog.show()
+    }
+
+    private fun isInternetConnected(): Boolean {
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        return connectivityManager.activeNetworkInfo?.isConnected == true
+    }
 
     override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE)

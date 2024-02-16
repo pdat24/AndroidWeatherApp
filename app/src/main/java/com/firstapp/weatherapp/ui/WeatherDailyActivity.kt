@@ -122,6 +122,4 @@ class WeatherDailyActivity : AppCompatActivity() {
     }
 
     fun back(view: View) = finish()
-
-    private fun showInternetConnection() {}
 }

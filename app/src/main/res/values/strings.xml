@@ -11,4 +11,6 @@
     <string name="location_perm_req_rationale">The application needs this permissions to work!</string>
     <string name="can_not_get_location">Update location failed</string>
     <string name="tomorrow">Tomorrow</string>
+    <string name="no_internet_connection">No internet connection.</string>
+    <string name="retry">Retry</string>
 </resources>
