@@ -1,4 +1,4 @@
-package com.firstapp.weatherapp.models
+package com.firstapp.weatherapp.models.current_and_hourly
 
 data class Astro(
     val is_moon_up: Int,

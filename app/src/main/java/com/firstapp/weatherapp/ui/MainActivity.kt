@@ -3,20 +3,25 @@ package com.firstapp.weatherapp.ui
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.location.Location
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.firstapp.weatherapp.MainApp
 import com.firstapp.weatherapp.R
 import com.firstapp.weatherapp.adapters.HourlyTemperatureAdapter
-import com.firstapp.weatherapp.apis.WeatherApi
+import com.firstapp.weatherapp.apis.CurrentWeatherApi
+import com.firstapp.weatherapp.apis.DailyForecastApi
+import com.firstapp.weatherapp.models.daily.DailyWeather
 import com.firstapp.weatherapp.utils.Constants
+import com.firstapp.weatherapp.utils.Functions
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -24,6 +29,7 @@ import com.vmadalin.easypermissions.EasyPermissions
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
@@ -31,20 +37,29 @@ import kotlin.math.roundToInt
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     companion object {
         const val LOCATION_PERMISSION_REQUEST_CODE = 12451
+        val dailyWeather = MutableLiveData<DailyWeather>()
+        var locationName: String? = null
     }
 
     private val rcvHourlyTemp: RecyclerView by lazy {
         findViewById(R.id.rcvHourlyTemp)
     }
-    private val weatherApi: WeatherApi = Retrofit.Builder()
-        .baseUrl(Constants.API_BASE_URL)
+    private val contentContainer: View by lazy {
+        findViewById(R.id.contentContainer)
+    }
+    private val currentWeatherApi: CurrentWeatherApi = Retrofit.Builder()
+        .baseUrl(Constants.CURRENT_WEATHER_API_BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
-        .build().create(WeatherApi::class.java)
+        .build().create(CurrentWeatherApi::class.java)
+    private val dailyForecastApi: DailyForecastApi = Retrofit.Builder()
+        .baseUrl(Constants.DAILY_WEATHER_API_BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(DailyForecastApi::class.java)
     private val locationPermissions = arrayOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION,
     )
-    private val location: MutableLiveData<Location> = MutableLiveData()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val tempTextDesc: TextView by lazy {
         findViewById(R.id.tvTempTextDesc)
@@ -64,7 +79,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private val humidity: TextView by lazy {
         findViewById(R.id.tvHumidity)
     }
-    private val tempImageDesc: TextView by lazy {
+    private val tempImageDesc: ImageView by lazy {
         findViewById(R.id.ivTempImageDesc)
     }
     private val datetime: TextView by lazy {
@@ -102,7 +117,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         fusedLocationClient
             .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
             .addOnSuccessListener {
-                location.postValue(it)
+                MainApp.location.postValue(it)
             }
             .addOnFailureListener {
                 Toast.makeText(
@@ -129,26 +144,63 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     @SuppressLint("SetTextI18n")
     private fun synchronizeUI(latitude: Double, longitude: Double) =
         lifecycleScope.launch {
-            val currentWeatherRes = weatherApi.getCurrentWeather("$latitude,$longitude")
-            val forecastRes = weatherApi.getWeatherForecastToday("$latitude,$longitude")
+            val currentWeatherRes = currentWeatherApi.getCurrentWeather("$latitude,$longitude")
+            val hourlyForecastRes =
+                currentWeatherApi.getWeatherForecastToday("$latitude,$longitude")
             if (currentWeatherRes.isSuccessful) {
                 currentWeatherRes.body()?.also {
+                    locationName = it.location.name
                     temperature.text = "${it.current.temp_c.roundToInt()}°"
-                    city.text = it.location.name
+                    city.text = locationName!!
                     datetime.text = getFormattedDateTime(LocalDateTime.now())
-                    tempTextDesc.text = it.current.condition.text
+                    val textDesc = it.current.condition.text
+                    tempTextDesc.text = textDesc
+                    val background = Functions.getWeatherBackgroundFromDesc(
+                        textDesc
+                    )
+                    contentContainer.setBackgroundResource(background)
+                    Functions.changeStatusBarColor(this@MainActivity, background)
+                    tempImageDesc.setImageDrawable(
+                        AppCompatResources.getDrawable(
+                            this@MainActivity,
+                            Functions.getWeatherIconFromDesc(textDesc)
+                        )
+                    )
                     visibility.text = "${it.current.vis_km.roundToInt()} km"
                     windSpeed.text = "${it.current.wind_kph.roundToInt()} km/h"
                     humidity.text = "${it.current.humidity}%"
                 }
-                viewNoData.visibility = View.GONE
             }
-            if (forecastRes.isSuccessful) {
-                forecastRes.body()?.also {
-                    rcvHourlyTemp.adapter = HourlyTemperatureAdapter(it.forecast.forecastday.first().hour)
+            if (hourlyForecastRes.isSuccessful) {
+                hourlyForecastRes.body()?.also {
+                    rcvHourlyTemp.adapter =
+                        HourlyTemperatureAdapter(it.forecast.forecastday.first().hour)
                 }
             }
+            viewNoData.visibility = View.GONE
+            fetchDailyWeather(latitude, longitude)
         }
+
+    private fun fetchDailyWeather(latitude: Double, longitude: Double) =
+        lifecycleScope.launch {
+            val start = getFormattedDate(1)
+            val end = getFormattedDate(7)
+            val dailyForecastRes = dailyForecastApi.getDailyForecast(
+                latitude, longitude, start, end
+            )
+            if (dailyForecastRes.isSuccessful) {
+                dailyWeather.postValue(dailyForecastRes.body())
+            }
+        }
+
+    /**
+     * Formatted pattern: yyyy-MM-dd
+     */
+    private fun getFormattedDate(daysFromToday: Long = 0): String {
+        return LocalDate.now().plusDays(daysFromToday).format(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        )
+    }
 
     private fun getFormattedDateTime(datetime: LocalDateTime): String {
         val pattern = DateTimeFormatter.ofPattern("EEE  MMM dd │ hh:mm a")
@@ -156,7 +208,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     private fun observeLocationChange() {
-        location.observe(this) {
+        MainApp.location.observe(this) {
             it.apply {
                 synchronizeUI(latitude, longitude)
             }

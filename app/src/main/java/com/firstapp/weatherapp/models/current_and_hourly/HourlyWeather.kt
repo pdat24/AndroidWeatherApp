@@ -1,6 +1,6 @@
-package com.firstapp.weatherapp.models
+package com.firstapp.weatherapp.models.current_and_hourly
 
-data class ForecastHour(
+data class HourlyWeather(
     val chance_of_rain: Int,
     val chance_of_snow: Int,
     val cloud: Int,

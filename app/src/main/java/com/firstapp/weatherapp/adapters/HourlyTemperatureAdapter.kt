@@ -10,15 +10,13 @@ import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.RecyclerView
 import com.firstapp.weatherapp.R
-import com.firstapp.weatherapp.models.ForecastHour
-import java.time.LocalDateTime
+import com.firstapp.weatherapp.models.current_and_hourly.HourlyWeather
+import com.firstapp.weatherapp.utils.Functions
 import java.time.LocalTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 class HourlyTemperatureAdapter(
-    private var hourlyForecast: List<ForecastHour>
+    private var hourlyForecast: List<HourlyWeather>
 ) : RecyclerView.Adapter<HourlyTemperatureAdapter.ViewHolder>() {
 
     private lateinit var context: Context
@@ -57,7 +55,7 @@ class HourlyTemperatureAdapter(
         holder.temperatureImageDesc.setImageDrawable(
             AppCompatResources.getDrawable(
                 context,
-                R.drawable.sunny
+                Functions.getWeatherIconFromDesc(info.condition.text)
             )
         )
         holder.temperature.text = "${info.temp_c.roundToInt()}°"
@@ -66,10 +64,10 @@ class HourlyTemperatureAdapter(
     private fun getPxFromDp(dp: Int): Int =
         dp * (context.resources.displayMetrics.densityDpi / 160)
 
-    private fun getSortedHourlyForecast(forecasts: List<ForecastHour>): List<ForecastHour> {
+    private fun getSortedHourlyForecast(forecasts: List<HourlyWeather>): List<HourlyWeather> {
         val currentHour = LocalTime.now().hour
-        val passedHours = mutableListOf<ForecastHour>()
-        val upcomingHours = mutableListOf<ForecastHour>()
+        val passedHours = mutableListOf<HourlyWeather>()
+        val upcomingHours = mutableListOf<HourlyWeather>()
         for (f in forecasts) {
             val forecastHour = getForecastHour(f.time)
             if (forecastHour < currentHour) {

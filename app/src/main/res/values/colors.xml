@@ -2,9 +2,17 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="purple">#2f155e</color>
-    <color name="light_grey">#BDBABA</color>
+    <color name="dark_purple">#2f155e</color>
+    <color name="purple">#43266a</color>
+    <color name="light_grey">#CCCACA</color>
     <color name="grey">#7E7A7A</color>
     <color name="yellow">#FFC107</color>
-    <color name="status_bar">#594690</color>
+    <color name="status_bar">#1c7bf3</color>
+    <color name="cloudy_status_bar">#2C69B0</color>
+    <color name="haze_status_bar">#ADB9C5</color>
+    <color name="sunny_status_bar">#3D8CD3</color>
+    <color name="rainy_status_bar">#4D7FA3</color>
+    <color name="snowy_status_bar">#B9C9E2</color>
+    <color name="hourly_temp_bg">#659DA1A0</color>
+    <color name="transparent_dark_grey">#65505151</color>
 </resources>

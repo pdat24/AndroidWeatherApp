@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
+    android:background="@drawable/ic_launcher_background"
     android:orientation="vertical"
-    android:paddingTop="160dp">
+    android:paddingTop="125dp">
 
     <TextView
         android:layout_width="match_parent"

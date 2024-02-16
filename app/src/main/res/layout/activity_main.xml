@@ -6,9 +6,11 @@
     android:layout_height="match_parent">
 
     <ScrollView
+        android:id="@+id/contentContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background">
+        android:background="@drawable/haze_bg"
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -28,8 +30,8 @@
 
             <ImageView
                 android:id="@+id/ivTempImageDesc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
                 android:layout_gravity="center"
                 android:contentDescription="@string/image_desc"
                 android:src="@drawable/cloudy_sunny" />
@@ -69,12 +71,13 @@
                 android:layout_marginBottom="24dp"
                 app:cardCornerRadius="18dp"
                 app:strokeColor="@color/grey"
+                android:backgroundTint="@android:color/transparent"
                 app:strokeWidth="1dp">
 
                 <com.google.android.flexbox.FlexboxLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/purple"
+                    android:background="@color/transparent_dark_grey"
                     android:paddingVertical="20dp"
                     app:justifyContent="space_evenly">
 
@@ -123,7 +126,6 @@
                             android:id="@+id/tvWindSpeed"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="12km/h"
                             android:textColor="@color/white"
                             android:textStyle="bold" />
 
